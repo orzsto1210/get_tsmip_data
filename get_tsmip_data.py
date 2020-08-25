@@ -131,27 +131,34 @@ def calc_pgv_intensity(my_st):
 
 def plot_vel_waveform(my_st, p_arrival, outname):
     fig = plt.figure(figsize=(12, 8))
-    ax = fig.add_subplot(3, 1, 1)
+    fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
-    ax.plot(my_st[0].data, "k-")
+    ax = fig.add_subplot(3, 1, 1)
+    ax.plot(my_st[0].data, "k-", linewidth=0.5)
+    ax.set_xlim(0, len(my_st[0].data))
     ymin, ymax = ax.get_ylim()
-    ax.vlines(p_arrival, ymin, ymax, color='r', linewidth=2, label="p_arrival")
+    ax.vlines(p_arrival, ymin, ymax, color='r', linewidth=1, label="p_arrival")
     plt.legend()
     ax.set_ylabel("cm/sec")
+    ax.set_title("Z")
 
     ax = fig.add_subplot(3, 1, 2)
-    ax.plot(my_st[1].data, "k-")
+    ax.plot(my_st[1].data, "k-", linewidth=0.5)
+    ax.set_xlim(0, len(my_st[1].data))
     ymin, ymax = ax.get_ylim()
-    ax.vlines(p_arrival, ymin, ymax, color='r', linewidth=2, label="p_arrival")
+    ax.vlines(p_arrival, ymin, ymax, color='r', linewidth=1, label="p_arrival")
     plt.legend()
     ax.set_ylabel("cm/sec")
+    ax.set_title("N")
 
     ax = fig.add_subplot(3, 1, 3)
-    ax.plot(my_st[2].data, "k-")
+    ax.plot(my_st[2].data, "k-", linewidth=0.5)
+    ax.set_xlim(0, len(my_st[2].data))
     ymin, ymax = ax.get_ylim()
-    ax.vlines(p_arrival, ymin, ymax, color='r', linewidth=2, label="p_arrival")
+    ax.vlines(p_arrival, ymin, ymax, color='r', linewidth=1, label="p_arrival")
     plt.legend()
     ax.set_ylabel("cm/sec")
+    ax.set_title("E")
 
     plt.suptitle(outname,size=14)
 
@@ -159,32 +166,40 @@ def plot_vel_waveform(my_st, p_arrival, outname):
         os.makedirs("vel_png")
     outname = "vel_png/" + outname+".png"
     
-    plt.savefig(outname)
+    plt.savefig(outname, bbox_inches='tight')
     # plt.show()
+    plt.close()
 
 def plot_acc_waveform(my_st, p_arrival, outname):
     fig = plt.figure(figsize=(12, 8))
-    ax = fig.add_subplot(3, 1, 1)
+    fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
-    ax.plot(my_st[0].data, "k-")
+    ax = fig.add_subplot(3, 1, 1)
+    ax.plot(my_st[0].data, "k-", linewidth=0.5)
+    ax.set_xlim(0, len(my_st[0].data))
     ymin, ymax = ax.get_ylim()
-    ax.vlines(p_arrival, ymin, ymax, color='r', linewidth=2, label="p_arrival")
+    ax.vlines(p_arrival, ymin, ymax, color='r', linewidth=1, label="p_arrival")
     plt.legend()
     ax.set_ylabel("gal")
+    ax.set_title("Z")
 
     ax = fig.add_subplot(3, 1, 2)
-    ax.plot(my_st[1].data, "k-")
+    ax.plot(my_st[1].data, "k-", linewidth=0.5)
+    ax.set_xlim(0, len(my_st[1].data))
     ymin, ymax = ax.get_ylim()
-    ax.vlines(p_arrival, ymin, ymax, color='r', linewidth=2, label="p_arrival")
+    ax.vlines(p_arrival, ymin, ymax, color='r', linewidth=1, label="p_arrival")
     plt.legend()
     ax.set_ylabel("gal")
+    ax.set_title("N")
 
     ax = fig.add_subplot(3, 1, 3)
-    ax.plot(my_st[2].data, "k-")
+    ax.plot(my_st[2].data, "k-", linewidth=0.5)
+    ax.set_xlim(0, len(my_st[2].data))
     ymin, ymax = ax.get_ylim()
-    ax.vlines(p_arrival, ymin, ymax, color='r', linewidth=2, label="p_arrival")
+    ax.vlines(p_arrival, ymin, ymax, color='r', linewidth=1, label="p_arrival")
     plt.legend()
     ax.set_ylabel("gal")
+    ax.set_title("E")
 
     plt.suptitle(outname,size=14)
 
@@ -192,8 +207,9 @@ def plot_acc_waveform(my_st, p_arrival, outname):
         os.makedirs("acc_png")
     outname = "acc_png/" + outname+".png"
 
-    plt.savefig(outname)
+    plt.savefig(outname, bbox_inches='tight')
     # plt.show()
+    plt.close()
 
 def get_p_arrival_data(my_st, p_arrival, sample, outname):
     E = my_st[2].data[p_arrival:p_arrival+sample]
@@ -223,51 +239,69 @@ def get_snr(my_st, p_arrival):
     return snr
 
 def save_acceleration_data(inflie):
-    st = unpack(inflie)
-    my_st = st.copy()
+    try:
+        st = unpack(inflie)
+        my_st = st.copy()
 
-    p_pick, s_pick = ar_pick(my_st[0].data, my_st[1].data, my_st[2].data, my_st[0].stats.sampling_rate,
-                         1.0, 20.0, 1.0, 0.1, 4.0, 1.0, 2, 8, 0.1, 0.2)
-    p_arrival = int(p_pick*100)
-    print(p_arrival)
+        p_pick, s_pick = ar_pick(my_st[0].data, my_st[1].data, my_st[2].data, my_st[0].stats.sampling_rate,
+                            1.0, 20.0, 1.0, 0.1, 4.0, 1.0, 2, 8, 0.1, 0.2)
+        p_arrival = int(p_pick*100)
+        # print(p_arrival)
 
-    snr = get_snr(my_st, p_arrival)
-    pga, intensity = calc_pga_intensity(my_st)
+        snr = get_snr(my_st, p_arrival)
+        pga, intensity = calc_pga_intensity(my_st)
 
-    outname = "_".join([inflie[:-4], my_st[0].stats.station, str(intensity), str(pga), str(snr)]) 
-    plot_acc_waveform(my_st, p_arrival, outname)
-    sample = 100
-    E, N, Z = get_p_arrival_data(my_st, p_arrival, sample, outname)
+        inflie = inflie.split('/')[-1]
+        outname = "_".join([inflie[:-4], my_st[0].stats.station, str(intensity), str(pga), str(snr)]) 
+        plot_acc_waveform(my_st, p_arrival, outname)
+        sample = 100
+        E, N, Z = get_p_arrival_data(my_st, p_arrival, sample, outname)
 
-    if not os.path.exists("acc_joblib"):
-        os.makedirs("acc_joblib")
-    outname = "acc_joblib/" + outname+".joblib"
-    joblib.dump([snr, pga, intensity, E, N, Z], outname)
+        if not os.path.exists("acc_joblib"):
+            os.makedirs("acc_joblib")
+        outname = "acc_joblib/" + outname+".joblib"
+        joblib.dump([snr, pga, intensity, E, N, Z], outname)
+    except Exception as e:
+        print(e)
 
 def save_velocity_data(inflie):
-    st = unpack(inflie)
-    my_st = st.copy()
-    my_st.integrate()
-    my_st.filter("highpass", freq=0.075)
+    try:
+        st = unpack(inflie)
+        my_st = st.copy()
+        my_st.integrate()
+        my_st.filter("highpass", freq=0.075)
 
-    p_pick, s_pick = ar_pick(my_st[0].data, my_st[1].data, my_st[2].data, my_st[0].stats.sampling_rate,
-                         1.0, 20.0, 1.0, 0.1, 4.0, 1.0, 2, 8, 0.1, 0.2)
-    p_arrival = int(p_pick*100)
-    print(p_arrival)
+        p_pick, s_pick = ar_pick(my_st[0].data, my_st[1].data, my_st[2].data, my_st[0].stats.sampling_rate,
+                            1.0, 20.0, 1.0, 0.1, 4.0, 1.0, 2, 8, 0.1, 0.2)
+        p_arrival = int(p_pick*100)
+        # print(p_arrival)
 
-    snr = get_snr(my_st, p_arrival)
-    pgv, intensity = calc_pgv_intensity(my_st)
+        snr = get_snr(my_st, p_arrival)
+        pgv, intensity = calc_pgv_intensity(my_st)
 
-    outname = "_".join([inflie[:-4], my_st[0].stats.station, str(intensity), str(pgv), str(snr)]) 
-    plot_vel_waveform(my_st, p_arrival, outname)
-    sample = 100
-    E, N, Z = get_p_arrival_data(my_st, p_arrival, sample, outname)
+        inflie = inflie.split('/')[-1]
+        outname = "_".join([inflie[:-4], my_st[0].stats.station, str(intensity), str(pgv), str(snr)]) 
+        plot_vel_waveform(my_st, p_arrival, outname)
+        sample = 100
+        E, N, Z = get_p_arrival_data(my_st, p_arrival, sample, outname)
 
-    if not os.path.exists("vel_joblib"):
-        os.makedirs("vel_joblib")
-    outname = "vel_joblib/" + outname+".joblib"
-    joblib.dump([snr, pgv, intensity, E, N, Z], outname)
+        if not os.path.exists("vel_joblib"):
+            os.makedirs("vel_joblib")
+        outname = "vel_joblib/" + outname+".joblib"
+        joblib.dump([snr, pgv, intensity, E, N, Z], outname)
+    except Exception as e:
+        print(e)
 
-inflie = "10026302.SSX.txt"
-save_acceleration_data(inflie)
-save_velocity_data(inflie)
+def run():
+    for directory, sub_directory, files in os.walk("tsmip-chichi"):
+        directory += "/"
+        print(directory)
+        files = [x for x in files if x.endswith(".txt")]
+        for i in files:
+            save_velocity_data(directory+i)
+            # save_acceleration_data(directory+i)
+
+# inflie = "10026302.SSX.txt"
+# save_acceleration_data(inflie)
+# save_velocity_data(inflie)
+run()
